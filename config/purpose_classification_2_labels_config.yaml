@@ -1,0 +1,33 @@
+experiment_name: 'purpose_classification_2_labels'
+data: 'data/cookie_banner_data.csv'
+raw_labels: [
+    'Essential functionalities',
+    'Offering service',
+    'Website/ux enhancement',
+    'Profiling',
+    'Advertisement',
+    'Custom content',
+    'Analytics',
+    'Social media features',
+]
+label_clusters: [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+]
+group_by_columns: [
+  'Document group',
+  'Segment'
+]
+label_column: 'Code'
+text_column: 'Segment'
+tokenizer_args:
+    padding: 'max_length'
+    truncation: True
+    max_length: 512
+cleaned: True

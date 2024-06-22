@@ -1,0 +1,97 @@
+version: "3.9"
+services:
+    cookie_crawler:
+        build:
+            context: ../
+            dockerfile: docker/crawler/Dockerfile
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        container_name: cookie_crawler
+        dns:
+            8.8.8.8
+        volumes:
+            - ../experiments:/opt/crawler/experiments
+            - ../domains:/opt/crawler/domains
+            - ../config:/opt/crawler/config
+            - ../logs:/opt/crawler/logs
+            - /tmp/.X11-unix:/tmp/.X11-unix
+        shm_size: 2gb
+        env_file:
+            -   ../.env
+        environment:
+            - CONSENTOMATIC_DIR=consentomatic
+        depends_on:
+            classifiers:
+                condition: service_started
+            postgres-cc:
+                condition: service_started
+            libretranslate-cc:
+                condition: service_healthy
+
+    classifiers:
+        build:
+            context: ../
+            dockerfile: docker/classifiers/Dockerfile
+        container_name: classifiers
+        env_file:
+            - ../.env
+        ports:
+            - 5001:5001
+#         Uncomment the following block and adapt it to your GPU settings
+#        deploy:
+#            resources:
+#                reservations:
+#                    devices:
+#                        - driver: nvidia
+#                          count: 1
+#                          capabilities: [gpu]
+
+    postgres-cc:
+        image: postgres:12
+        container_name: postgres-cc
+        restart: unless-stopped
+        ports:
+            - 5432:5432
+        logging:
+            driver: "json-file"
+            options:
+                max-size: 50m
+        environment:
+            - POSTGRES_DB=crawl
+            - POSTGRES_USER=cookiestudy23
+            - POSTGRES_PASSWORD=cookiestudy2023
+        volumes:
+            - postgres-local:/var/lib/postgresql/data/
+
+    libretranslate-cc:
+        image: libretranslate/libretranslate:v1.5.6
+        restart: unless-stopped
+        ports:
+            - 5000:5000
+        healthcheck:
+            test: ['CMD-SHELL', './venv/bin/python scripts/healthcheck.py']
+        volumes:
+            - lt-local:/home/libretranslate/.local
+
+    ml-eval:
+        build:
+            context: ../
+            dockerfile: docker/ml-eval/Dockerfile
+        container_name: ml-eval
+#        Uncomment the following block and adapt it to your GPU settings
+#        deploy:
+#            resources:
+#                reservations:
+#                    devices:
+#                        - driver: nvidia
+#                          count: 1
+#                          capabilities: [gpu]
+
+volumes:
+    lt-local:
+        name: lt-local
+        external: false
+
+    postgres-local:
+        name: postgres-local
+        external: false

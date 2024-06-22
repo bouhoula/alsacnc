@@ -1,0 +1,213 @@
+# General config
+engine: postgres
+num_browsers: 30 # number of parallel browsers used for the crawl
+num_attempts_per_website: 1 # total number of crawl attempts per website
+timeout: 2700 # in seconds
+experiment_id: null # used to identify the crawl in the database, null = generated automatically
+screen_width: 2732
+screen_height: 1366
+dump_full_page_html: False
+save_cookie_banner_screenshot: False
+check_gpc_presence: False
+override: False
+extract_accept_none_cookies: True
+save_intervals: null
+first_interval: 0
+origin: de
+
+# Exploration parameters
+explore_cookie_banner: True
+# exploring cookie notices using the models interactive elements requires to run the "naive" mode first to extract the text of interactive elements
+exploration_modes: ["naive", "with_ietc_model"] # ["naive"] or ["naive", "with_ietc_model"]
+dfs_depth: 1 # dfs_depth 0 corresponds to depth 1
+extract_cookie_settings_with_z_index: True
+explore_elements_yielding_new_text_only: True
+extract_cookie_banner_text: True
+extract_interactive_elements_text: False
+translate_non_english_text: True
+detect_dark_patterns: True
+ietc_model_url: http://host.docker.internal:5001/predict_ietc
+num_links_for_browsing: 5
+
+# CMP detection parameters
+detect_cmp:
+    detect_cmp_enabled: True
+    detect_cmp_methods: ["consentomatic", "tcfapi"]
+
+domains_config:
+    domains_source: crux # use `list` to crawl from a custom domains list. To use `crux`, refer to README.md.
+    domains_path: null # specify custom domains path
+    # crux-related parameters
+    countries: [
+      "us", "gb", "fr", "de", "ie", "at", "nl", "pl", "es", "se", "ch"
+    ]
+    countries_desc: "eu_uk"
+    crux_date: "202303"
+    maximum_rank: 10000
+    num_domains: 0
+    num_samples_per_country_per_rank: 10000
+    split_interval: 200
+
+# language-related parameters
+supported_languages:
+  da:
+    model:
+      type: spacy
+      name: da_core_news_sm
+    language_name: Danish
+    keywords:
+      cookie:
+        - cookie
+        - legitim interesse
+        - legitime interesser
+  de:
+    model:
+      type: spacy
+      name: de_core_news_sm
+    language_name: German
+    keywords:
+      cookie:
+        - cookie
+        - berechtigtes interesse
+        - berechtigte interesse
+  en:
+    model:
+      type: spacy
+      name: en_core_web_sm
+    language_name: English
+    keywords:
+      cookie:
+        - cookie
+        - legitimate interest
+  es:
+    model:
+      type: spacy
+      name: es_core_news_sm
+    language_name: Spanish
+    keywords:
+      cookie:
+        - cookie
+        - interés legítimo
+        - intereses legítimos
+  fi:
+    model:
+      type: spacy
+      name: fi_core_news_sm
+    language_name: Finnish
+    keywords:
+      cookie:
+        - cookie
+        - eväst
+        - oikeutettu etu
+        - oikeutettuja etuja
+  fr:
+    model:
+      type: spacy
+      name: fr_core_news_sm
+    language_name: French
+    keywords:
+      cookie:
+        - cookie
+        - intérêt légitime
+        - intérêts légitimes
+  it:
+    model:
+      type: spacy
+      name: it_core_news_sm
+    language_name: Italian
+    keywords:
+      cookie:
+        - cookie
+        - legittimo interesse
+        - interessi legittimi
+  nl:
+    model:
+      type: spacy
+      name: nl_core_news_sm
+    language_name: Dutch
+    keywords:
+      cookie:
+        - cookie
+        - gerechtvaardigd belang
+        - gerechtvaardigde belangen
+  pl:
+    model:
+      type: spacy
+      name: pl_core_news_sm
+    language_name: Polish
+    keywords:
+      cookie:
+        - cookie
+        - ciasteczka
+        - ciastko
+        - uzasadnionego interes
+        - uzasadniony interes
+        - uzasadnione interes
+  pt:
+    model:
+      type: spacy
+      name: pt_core_news_sm
+    language_name: Portuguese
+    keywords:
+      cookie:
+        - cookie
+        - interesse legítimo
+        - interesses legítimos
+  sv:
+    model:
+      type: spacy
+      name: sv_core_news_sm
+    language_name: Swedish
+    keywords:
+      cookie:
+        - cookie
+        - berättigat intresse
+        - berättigade intressen
+
+
+# Modify this to use a custom proxy
+proxy:
+    proxy_enabled: False
+    proxy_server: host.docker.internal
+    proxy_port: 24000
+    no_proxies_on: localhost,127.0.0.1,host.docker.internal
+
+
+# Refer to https://github.com/openwpm/OpenWPM/blob/master/openwpm/config.py
+browser_config:
+    browser: "firefox"
+
+    display_mode: "xvfb"
+
+    cookie_instrument: True
+    js_instrument: False
+    http_instrument: False
+    navigation_instrument: False
+    save_content: False
+    callstack_instrument: False
+
+    seed_tar: null # Specify firefox profile if needed
+
+    bot_mitigation: True
+
+    donottrack: False
+    tp_cookies: "always"
+
+    prefs:
+        accessibility.tabfocus: 7
+        browser.cache.check_doc_frequency: 2
+        xpinstall.signatures.required: False
+        privacy.resistFingerprinting: False
+        privacy.trackingprotection.pbmode.enabled: False
+        privacy.trackingprotection.enabled: False
+        network.cookie.maxNumber: 10000
+        network.cookie.maxPerHost: 10000
+        network.cookie.quotaPerHost: 10000
+        privacy.socialtracking.block_cookies.enabled: False
+        network.cookie.thirdparty.sessionOnly: False
+        network.cookie.sameSite.laxByDefault: True
+
+
+# Development config
+debug: False
+clear_db: False

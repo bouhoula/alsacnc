@@ -1,0 +1,11 @@
+.idea/
+**/.git
+**/.DS_Store
+**/__pycache__/
+openwpm/
+logs/
+collected_data/
+ignored_by_git/
+*.log
+archived_experiments/
+venv*/

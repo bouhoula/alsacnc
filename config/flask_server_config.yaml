@@ -1,0 +1,17 @@
+two_step_model: False
+problem_type: single_label_classification
+model_type: Bert
+model_path: models/interactive_elements_model
+model_path_2: null
+label2id:
+    "Accept": 0
+    "Close/Continue without accepting": 1
+    "Cookies settings": 2
+    "Other": 3
+    "Reject": 4
+    "Save cookie settings": 5
+tokenizer_path: bert-base-uncased
+tokenizer_args:
+    padding: 'max_length'
+    truncation: True
+    max_length: 512
