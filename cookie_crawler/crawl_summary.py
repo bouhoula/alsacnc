@@ -245,7 +245,7 @@ def main(experiment_id: Optional[str]) -> None:
         print_dict(dark_patterns, tab=4)
 
     crawl_results["consentomatic"] = crawl_results["cmp"].apply(
-        lambda x: [] if x is None else x["consentomatic"]
+        lambda x: [] if (x is None or x["consentomatic"] is None) else x["consentomatic"]
     )
     crawl_results["uses_tcf_iab"] = crawl_results["cmp"].apply(
         lambda x: x is not None
