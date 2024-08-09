@@ -12,6 +12,7 @@ BUILD_ALL=0
 NOT_FOUND=false
 DOCKER_COMPOSE_CMD="run"
 COMPOSE_CMD=""
+STOP_CONTAINERS=0
 
 # Check for docker compose command
 if command -v docker-compose &> /dev/null; then
@@ -31,76 +32,86 @@ while [[ $NOT_FOUND = false ]]
 do
     case "$1" in
         --test)
-	      DOCKER_COMPOSE_CMD=""
-              SCRIPT="python cookie_crawler/run_crawler.py"
-              SERVICE="cookie_crawler"
-              shift
-              ;;
+	        DOCKER_COMPOSE_CMD=""
+            SCRIPT="python cookie_crawler/run_crawler.py"
+            SERVICE="cookie_crawler"
+            shift
+            ;;
 
         --crawler)
-              SCRIPT="python cookie_crawler/run_crawler.py"
-              SERVICE="cookie_crawler"
-              shift
-              ;;
+            SCRIPT="python cookie_crawler/run_crawler.py"
+            SERVICE="cookie_crawler"
+            shift
+            ;;
 
         --predictor)
-              SCRIPT="python classifiers/predict_cookies.py"
-              SCRIPT2="python classifiers/predict_purposes.py"
-              SERVICE="classifiers"
-              shift
-              ;;
+            SCRIPT="python classifiers/predict_cookies.py"
+            SCRIPT2="python classifiers/predict_purposes.py"
+            SERVICE="classifiers"
+            shift
+            ;;
 
-      --summary)
-              SCRIPT="python cookie_crawler/crawl_summary.py"
-              SERVICE="cookie_crawler"
-              DETACH=""
-              shift
-              ;;
+        --summary)
+            SCRIPT="python cookie_crawler/crawl_summary.py"
+            SERVICE="cookie_crawler"
+            DETACH=""
+            shift
+            ;;
 
-      --ml-eval)
-              SERVICE="ml-eval"
-	            SCRIPT="bash ./classifiers/ml_eval.sh"
-              DETACH=""
-              shift
-              ;;
+        --down)
+            STOP_CONTAINERS=1
+            shift
+            ;;
 
-      --ls)
-              SCRIPT="python database/queries.py --command ls"
-              SERVICE="cookie_crawler"
-              DETACH=""
-              shift
-              ;;
+         --ml-eval)
+            SERVICE="ml-eval"
+            SCRIPT="bash ./classifiers/ml_eval.sh"
+            DETACH=""
+            shift
+            ;;
+
+        --ls)
+            SCRIPT="python database/queries.py --command ls"
+            SERVICE="cookie_crawler"
+            DETACH=""
+            shift
+            ;;
 
         --fg)
-              DETACH=""
-              shift
-              ;;
+            DETACH=""
+            shift
+            ;;
 
         --no_cache)
-              NO_CACHE="--no-cache"
-              shift
-              ;;
+            NO_CACHE="--no-cache"
+            shift
+            ;;
 
         --script)
-              SCRIPT=$2
-              shift 2
-              ;;
+            SCRIPT=$2
+            shift 2
+            ;;
 
         --build_all)
-              BUILD_ALL=1
-              SERVICES_TO_BUILD=""
-              shift
-              ;;
+            BUILD_ALL=1
+            SERVICES_TO_BUILD=""
+            shift
+            ;;
 
         *)
-          NOT_FOUND=true
-          ;;
+            NOT_FOUND=true
+            ;;
 
     esac
 done
 
+if [ $STOP_CONTAINERS == 1 ]; then
+    $COMPOSE_CMD down
+    exit 0
+fi
+
 if [ -z $SERVICE ]; then
-    echo "Please use one of the --crawler, --predictor or --summary flags."
+    echo "Please use one of the --crawler, --predictor, --summary, or --down flags."
     exit 1
 fi
 
@@ -118,5 +129,3 @@ if [[ -n $DOCKER_COMPOSE_CMD ]]; then
         $COMPOSE_CMD $DOCKER_COMPOSE_CMD $DETACH $SERVICE $SCRIPT2 $*
     fi
 fi
-
-cd ..
