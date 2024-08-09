@@ -32,9 +32,9 @@ while [[ $NOT_FOUND = false ]]
 do
     case "$1" in
         --test)
-	        DOCKER_COMPOSE_CMD=""
-            SCRIPT="python cookie_crawler/run_crawler.py"
-            SERVICE="cookie_crawler"
+            DOCKER_COMPOSE_CMD="up"
+            SCRIPT=""
+            SERVICE="libretranslate-cc"
             shift
             ;;
 

@@ -69,6 +69,7 @@ Run
 
 If this command does not encounter errors, the Docker environment was successfully built. A typical failure can be caused by insufficient storage.
 
+This commands also starts the LibreTranslate container, which has to download several models upon creation and remains unhealthy until the download is complete. Please wait until the container is healthy before running the crawl. You can monitor this by using the `docker ps` command.
 
 ## Run
 
@@ -77,8 +78,6 @@ Use the following command to run the crawl:
 ```shell
 ./run.sh --crawler
 ```
-
-Note that when you run the command for the first time, it may fail because of unhealthy `libretranslate-cc` container. Please run the command again if this happens. The LibreTranslate container has to download several models upon creation, and it remains unhealthy until the download is complete.
 
 The default parameters correspond to those used in the main crawl that we present in the paper.
 
@@ -116,6 +115,8 @@ Then, run the following command to display a summary of the crawl results
 
 ### Errors/warnings
 
+* If `run.sh` fails with the error `container docker-libretranslate-cc-1 is unhealthy` simply rerunning the command should resolve the issue. When the command is executed for the first time, the LibreTranslate container has to download several models and it remains unhealthy until the download is complete.
+
 * When running `run.sh`, please ignore the`WARN[0000] YOUR_PATH/docker-compose.yaml:version is obsolete` warning. It can be resolved by removing the first line of `docker/docker-compose.yaml`, but we keep it for backward compatibility as it does not affect functionality.
 
 * During the crawl, please ignore the following error message that is frequently displayed.
@@ -124,7 +125,6 @@ Then, run the following command to display a summary of the crawl results
     ```
 
 * The crawler may run into other errors if it is run with limited resources.
-
 
 ### Evaluate the machine learning models
 
