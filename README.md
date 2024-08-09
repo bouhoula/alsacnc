@@ -22,6 +22,15 @@
 └── run.sh               # Script to run the crawler, predictions and observatory with Docker
 ```
 
+## Hardware dependencies
+
+The artifact can run on any machine with an `x86-64` architecture CPU and the necessary software dependencies. We used a machine with a 16-core CPU (AMD 5950X), 64GB RAM, and an RTX 3080 Ti GPU.
+Machines with different performance may require to adjust the `--num\_browsers` parameter, which indicates the number of parallel browsers used by the crawler. As a rule of thumb, modern CPUs can handle two browsers per physical core.
+
+We recommend running the artifact with 50 GB of free storage on the root partition.
+
+Note that the GPU is not mandatory to run the crawler. It is highly recommended if you would like to evaluate the ML models as it significantly speeds up training times. To use a GPU, please adapt the `docker/docker-compose.yaml` according to the instructions under the `classifier` and `ml-eval` services.
+
 ## Setup
 
 ### 1. Make sure to have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
@@ -50,6 +59,17 @@ An API key is needed to download domains from the Chrome User Experience Report.
 
 Alternatively, if you run the crawl with the default `domains_config` parameters, it will use a cached list under the `domains/` directory. You can also use a custom crawling list with the arguments `--domains_source list` and `--domains_path domains/custom_domains.txt`. Please refer to `domains/custom_domains.txt` for an example of such a list.
 
+## Sanity check
+
+Run
+
+```shell
+./run.sh ---test
+```
+
+If this command does not encounter errors, the Docker environment was successfully built. A typical failure can be caused by insufficient storage.
+
+
 ## Run
 
 Use the following command to run the crawl:
@@ -57,6 +77,8 @@ Use the following command to run the crawl:
 ```shell
 ./run.sh --crawler
 ```
+
+Note that when you run the command for the first time, it may fail because of unhealthy `libretranslate-cc` container. Please run the command again if this happens. The LibreTranslate container has to download several models upon creation, and it remains unhealthy until the download is complete.
 
 The default parameters correspond to those used in the main crawl that we present in the paper.
 
@@ -106,7 +128,16 @@ Then, run the following command to display a summary of the crawl results
 
 ### Evaluate the machine learning models
 
+Note that this will in particular perform K-fold cross-validation of the BERT models, which can be very slow without a GPU.
+
 Run:
 ```shell
 ./run.sh --ml-eval
+```
+
+### Bring down the docker-compose services
+
+Run:
+```shell
+./run.sh --down
 ```
