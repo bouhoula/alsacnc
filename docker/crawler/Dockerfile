@@ -18,7 +18,6 @@ RUN apt-get clean -qq \
 
 ENV HOME /opt
 COPY docker/crawler/install-mamba.sh .
-COPY docker/crawler/mamba.sh .
 RUN ./install-mamba.sh
 ENV PATH $HOME/mamba/bin:$PATH
 
@@ -27,7 +26,7 @@ ENV PATH $HOME/mamba/bin:$PATH
 WORKDIR /opt
 RUN mkdir crawler
 WORKDIR /opt/crawler
-RUN git clone --depth 1 --branch v0.23.0 https://github.com/openwpm/OpenWPM.git openwpm
+RUN git clone --depth 1 --branch v0.29.0 https://github.com/openwpm/OpenWPM.git openwpm
 WORKDIR /opt/crawler/openwpm
 RUN ./install.sh
 ENV PATH $HOME/mamba/envs/openwpm/bin:$PATH

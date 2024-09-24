@@ -35,6 +35,7 @@ do
             DOCKER_COMPOSE_CMD="up"
             SCRIPT=""
             SERVICE="libretranslate-cc"
+            BUILD_ALL=1
             shift
             ;;
 

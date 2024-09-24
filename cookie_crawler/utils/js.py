@@ -63,9 +63,7 @@ def get_selector_from_element(
 def clear_data(webdriver: Firefox) -> None:
     webdriver.get("about:preferences#privacy")
     webdriver.execute_script(open("cookie_crawler/scripts/clear_data.js").read())
-    WebDriverWait(webdriver, 20).until(EC.alert_is_present())
-    webdriver.switch_to.alert.accept()
-
+    time.sleep(2)
 
 def element_is_hidden(element: WebElement, webdriver: Firefox) -> bool:
     return webdriver.execute_script(

@@ -9,6 +9,7 @@
 # and consumes less resources
 
 # Ref: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/use-conda-with-travis-ci.html
+wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh" -O mamba.sh;
 bash mamba.sh -b -p $HOME/mamba
 source "$HOME/mamba/etc/profile.d/conda.sh"
 hash -r
