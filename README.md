@@ -64,7 +64,7 @@ Alternatively, if you run the crawl with the default `domains_config` parameters
 Run
 
 ```shell
-./run.sh ---test
+./run.sh --test
 ```
 
 If this command does not encounter errors, the Docker environment was successfully built. A typical failure can be caused by insufficient storage.
