@@ -26,7 +26,7 @@ ENV PATH $HOME/mamba/bin:$PATH
 WORKDIR /opt
 RUN mkdir crawler
 WORKDIR /opt/crawler
-RUN git clone --depth 1 --branch v0.29.0 https://github.com/openwpm/OpenWPM.git openwpm
+RUN git clone --depth 1 --branch v0.31.0 https://github.com/openwpm/OpenWPM.git openwpm
 WORKDIR /opt/crawler/openwpm
 RUN ./install.sh
 ENV PATH $HOME/mamba/envs/openwpm/bin:$PATH
@@ -36,10 +36,6 @@ ENV PATH $HOME/mamba/envs/openwpm/bin:$PATH
 # we mount a local source code directory as /opt/OpenWPM
 RUN mv firefox-bin /opt/firefox-bin
 ENV FIREFOX_BINARY /opt/firefox-bin/firefox-bin
-
-# Clone Tracker Radar repo
-WORKDIR /opt
-RUN git clone --depth 1 https://github.com/duckduckgo/tracker-radar.git
 
 # Install python dependencies
 WORKDIR /opt/crawler
