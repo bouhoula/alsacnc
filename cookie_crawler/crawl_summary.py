@@ -146,7 +146,7 @@ def main(experiment_id: Optional[str]) -> None:
     if experiment_id is None:
         experiment_id = get_last_experiment()
 
-    domains_path = "domains/crux_202303_eu_uk_top_10000_N_10000.csv"
+    domains_path = "domains/custom_domains.txt"
 
     print("Number of websites in the crawling list:", len(pd.read_csv(domains_path)))
 

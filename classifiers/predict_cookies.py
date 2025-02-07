@@ -59,12 +59,18 @@ def make_cookie_predictions_iteration(
             cookies_dict[cookie_key] = {
                 "visit_id": row["visit_id"],
                 "name": row["name"],
+                "value": row["value"],
                 "cookie_domain": row["cookie_domain"],
                 "path": row["path"],
                 "website": website["name"],
                 "website_id": website["id"],
                 "timestamp": row["timestamp"],
                 "collection_strategy": row["collection_strategy"],
+                "session": bool(row["is_session"]),
+                "http_only": bool(row["is_http_only"]),
+                "host_only": bool(row["is_host_only"]),
+                "secure": bool(row["is_secure"]),
+                "same_site": row["same_site"],
                 "variable_data": [],
             }
 
@@ -97,9 +103,15 @@ def make_cookie_predictions_iteration(
                 for key in [
                     "visit_id",
                     "name",
+                    "value",
                     "cookie_domain",
                     "path",
                     "website_id",
+                    "session",
+                    "http_only",
+                    "host_only",
+                    "secure",
+                    "same_site",
                     "timestamp",
                     "collection_strategy",
                 ]
@@ -149,6 +161,12 @@ def copy_cookies_iteration(ts: Dict, experiment_id: str) -> Dict:
     cookies.drop(["time_stamp", "host", "first_party_domain"], axis=1, inplace=True)
     cookies["collection_strategy"] = ts["collection_strategy"]
     cookies["website_id"] = ts["website_id"]
+    cookies["value"] = cookies["value"]
+    cookies["session"]= cookies["is_session"]
+    cookies["http_only"]= cookies["is_http_only"]
+    cookies["host_only"]= cookies["is_host_only"]
+    cookies["secure"]= cookies["is_secure"]
+    cookies["same_site"]= cookies["same_site"]
     cookies["expiry"] = cookies["expiry"].apply(
         lambda x: x if not x.startswith("+") else "9999-12-31T21:59:59.000Z"
     )

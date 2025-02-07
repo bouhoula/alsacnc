@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DETACH="--detach"
+DETACH= #"--detach"
 EXPORT_DB=0
 PROFILER_PARAMS=""
 NO_CACHE=""

@@ -2,12 +2,12 @@
 engine: postgres
 num_browsers: 30 # number of parallel browsers used for the crawl
 num_attempts_per_website: 1 # total number of crawl attempts per website
-timeout: 2700 # in seconds
+timeout: 200 # in seconds
 experiment_id: null # used to identify the crawl in the database, null = generated automatically
 screen_width: 2732
 screen_height: 1366
-dump_full_page_html: False
-save_cookie_banner_screenshot: False
+dump_full_page_html: True
+save_cookie_banner_screenshot: True 
 check_gpc_presence: False
 override: False
 extract_accept_none_cookies: True
@@ -209,5 +209,5 @@ browser_config:
 
 
 # Development config
-debug: False
+debug: False 
 clear_db: False

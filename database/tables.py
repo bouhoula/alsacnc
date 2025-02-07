@@ -222,9 +222,16 @@ class CookiesWithPredictions(Base, CustomOperations):
     __tablename__ = "cookies_with_predictions"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    value = Column(String, nullable=True)
     cookie_domain = Column(String, nullable=False)
     visit_id = Column(BigInteger, nullable=False)
     website_id = Column(Integer, ForeignKey("websites.id"))
+    http_only = Column(Boolean, nullable=False)
+    host_only = Column(Boolean, nullable=False)
+    session = Column(Boolean, nullable=False)
+    same_site = Column(String, nullable=False)
+    cookie_domain = Column(String, nullable=False)
+    secure = Column(Boolean, nullable=False)
     website = relationship(
         "Website",
         back_populates="cookies_with_predictions",

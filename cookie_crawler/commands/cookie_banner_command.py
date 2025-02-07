@@ -177,6 +177,11 @@ class GetCookieBannerCommand(BaseCommand):
                         self.website["save_path"], "cookie_banner_screenshot.png"
                     )
                 )
+                webdriver.save_screenshot(
+                    os.path.join(
+                        self.website["save_path"], "full_screenshot.png"
+                    )
+                )
 
             if iframe_id is not None:
                 webdriver.switch_to.parent_frame()
