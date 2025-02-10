@@ -33,8 +33,8 @@ def run(self: BrowserManager) -> None:
 
         extension_socket: Optional[ClientSocket] = None
 
-        if self.browser_params.extension_enabled:
-            extension_socket = self._start_extension(browser_profile_path)
+        #if self.browser_params.extension_enabled:
+        extension_socket = self._start_extension(browser_profile_path)
 
         self.logger.debug(
             "BROWSER %i: BrowserManager ready." % self.browser_params.browser_id
