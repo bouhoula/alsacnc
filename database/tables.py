@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    LargeBinary,
 )
 from sqlalchemy import Text as TextType
 from sqlalchemy.engine import Compiled
@@ -349,6 +350,7 @@ class Website(Base, CustomOperations):
     similarweb_data = Column(JSON)
     ranking_data = Column(JSON)
     cmp = Column(JSON)
+    screenshot = Column(LargeBinary)
     other = Column(JSON)
 
     experiment_id = Column(String, ForeignKey("experiments.id"))

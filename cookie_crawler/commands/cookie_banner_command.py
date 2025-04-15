@@ -170,13 +170,16 @@ class GetCookieBannerCommand(BaseCommand):
                 cookie_mention=1,
                 z_index=get_z_index(element, webdriver, default_value=None),
             )
-
+            #print ("Save Banner : " + str(self.config["save_cookie_banner_screenshot"]))
             if self.config["save_cookie_banner_screenshot"]:
                 element.screenshot(
                     os.path.join(
                         self.website["save_path"], "cookie_banner_screenshot.png"
                     )
                 )
+                #self.website["screenshot"] = webdriver.get_full_page_screenshot_as_png()
+                self.website["screenshot"] = webdriver.get_screenshot_as_png()
+                update_entry(self.website)
                 webdriver.save_screenshot(
                     os.path.join(
                         self.website["save_path"], "full_screenshot.png"
@@ -202,9 +205,22 @@ class GetCookieBannerCommand(BaseCommand):
         if self.config["extract_accept_none_cookies"]:
             try:
                 start_time = time.time()
+                cookies = webdriver.get_cookies()
+                insert_into_db(
+                    "cookie_timestamps",
+                    dict(
+                        website_id=self.website["id"],
+                        collection_strategy="Before Exploration",
+                        visit_id=self.visit_id,
+                        start_timestamp=load_timestamp,
+                        end_timestamp=datetime.utcnow(),
+                        num_cookies=len(cookies),
+                    ),
+                )
                 banner_selector = (
                     detected_selectors[0] if cookie_banner["detected"] else None
                 )
+                print("Will start browsing")
                 browse(
                     self.website["url"],
                     webdriver,
