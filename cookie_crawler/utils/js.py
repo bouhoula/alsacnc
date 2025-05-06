@@ -249,3 +249,12 @@ def sort_elements(elements: List[WebElement], webdriver: Firefox) -> List[WebEle
         open("cookie_crawler/scripts/sort_elements.js").read(),
         elements,
     )
+
+
+@repeat()
+def get_button_placement(
+    element: WebElement, cookie_notice: WebElement, webdriver: Firefox
+) -> Tuple[Optional[int], Optional[int]]:
+    return webdriver.execute_script(
+        open("cookie_crawler/scripts/analyzeButtonPlacement.js").read(), element, cookie_notice
+    )

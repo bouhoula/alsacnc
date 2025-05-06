@@ -23,6 +23,7 @@ from cookie_crawler.utils.colors import ColorDB
 from cookie_crawler.utils.js import (
     element_is_hidden,
     find_element_by_selector,
+    get_button_placement,
     get_selector_from_element,
     get_visible_elements,
     scroll_into_view,
@@ -91,12 +92,20 @@ def get_style_properties(element: WebElement, webdriver: Firefox) -> Dict:
     )
 
 
+def placement_is_suspicious(placement: List[int], threshold: float) -> bool:
+    assert len(placement) == 3
+    if threshold > 0.5:
+        threshold = 1 - threshold
+    x, y, z = placement
+    return 1 - threshold > x / z > threshold or 1 - threshold > y / z > threshold
+
+
 def detect_interface_interference(
     interactive_elements: Dict[str, List],
     banner_selector: str,
     banner_iframe_id: Optional[str],
     webdriver: Firefox,
-) -> Tuple[Optional[bool], Dict[str, Any]]:
+) -> Tuple[Optional[bool], Dict[str, Any], Dict, bool]:
     accept_label = "Accept"
     reject_labels = [
         "Reject",
@@ -106,22 +115,28 @@ def detect_interface_interference(
     ]
     reject_label: str
     if len(interactive_elements[accept_label]) == 0:
-        return None, {}
+        return None, {}, {}, False
     for label in reject_labels:
         if label is None:
-            return None, {}
+            return None, {}, {}, False
         if len(interactive_elements[label]) > 0:
             reject_label = label
             break
 
     styles = []
+    placements = {}
+    placement_summaries = []
     for label in [accept_label, reject_label]:
         selector = interactive_elements[label][0][1][0]
         iframe_selector = interactive_elements[label][0][2][0]
         iframe = find_element_by_selector(iframe_selector, webdriver)
         if iframe is not None:
             webdriver.switch_to.frame(iframe)
+        banner = find_element_by_selector(banner_selector, webdriver)
         element = find_element_by_selector(selector, webdriver)
+        placement = get_button_placement(element, banner, webdriver)
+        placement_summaries.append(placement_is_suspicious(placement, threshold=0.25))
+        placements[label] = placement
         if element is None:
             print(
                 "Warning: could not find previously detected element for interface interference detection"
@@ -171,7 +186,7 @@ def detect_interface_interference(
         reject_element=dict(label=reject_label, style=reject_style),
         background_color=(background_color_name, background_color),
     )
-    return interface_interference_found, query_summary
+    return interface_interference_found, query_summary, placements, not placement_summaries[0] and placement_summaries[1]
 
 
 def detect_forced_action(

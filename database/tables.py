@@ -293,6 +293,9 @@ class CrawlResults(Base, CustomOperations):
     # after text predictions
     tracking_purposes_detected_in_initial_text = Column(Integer)
     tracking_purposes_detected = Column(Integer)
+    # button placement
+    button_placements = Column(JSON, nullable=True)
+    placement_violation = Column(Boolean, nullable=True)
     other = Column(JSON, nullable=True)
 
 

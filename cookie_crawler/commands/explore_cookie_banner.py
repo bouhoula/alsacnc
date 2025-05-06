@@ -503,6 +503,8 @@ def explore_cookie_banner_with_ietc_model(
         (
             interface_interference_detected,
             interface_interference_summary,
+            button_placements,
+            placement_violation
         ) = detect_interface_interference(
             filtered_interactive_elements,
             banner_selector,
@@ -512,6 +514,8 @@ def explore_cookie_banner_with_ietc_model(
         crawl_results.update(
             interface_interference_detected=interface_interference_detected,
             interface_interference_analysis=interface_interference_summary,
+            button_placements=button_placements,
+            placement_violation=placement_violation,
         )
 
     for text, selector, iframe_id in interactive_elements[LABELS["settings"]]:

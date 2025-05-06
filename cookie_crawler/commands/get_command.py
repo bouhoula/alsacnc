@@ -240,7 +240,7 @@ def browse(
         return
     links_ids = get_selector_from_element(links, webdriver)
     random.seed(seed)
-    clicked_urls = []
+    clicked_links = []
     for i in range(num_links):
         r = int(random.random() * len(links))
 
@@ -259,10 +259,12 @@ def browse(
             print("current Url :" + webdriver.current_url )
             if webdriver.current_url != website["url"]:
                 print(webdriver.current_url )
-                clicked_urls.append(webdriver.current_url)
+                clicked_links.append(webdriver.current_url)
             webdriver.back()
+            clicked_links.append(link)
         except Exception:
             pass
+    return clicked_links
 
 
 class GetCommand(BaseCommand):
