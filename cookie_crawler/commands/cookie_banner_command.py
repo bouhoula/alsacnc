@@ -18,6 +18,7 @@ from cookie_crawler.commands.get_command import (
     browse,
     find_prefix_and_load_page,
     load_page,
+    scroll_to_bottom,
 )
 from cookie_crawler.utils.cmp import detect_cmp
 from cookie_crawler.utils.css_selectors import parse_selectors_for_url
@@ -219,6 +220,21 @@ class GetCookieBannerCommand(BaseCommand):
                 )
                 banner_selector = (
                     detected_selectors[0] if cookie_banner["detected"] else None
+                )
+                print("Scrolling ..")
+                scroll_to_bottom(webdriver)
+                time.sleep(2)
+                cookies = webdriver.get_cookies()
+                insert_into_db(
+                    "cookie_timestamps",
+                    dict(
+                        website_id=self.website["id"],
+                        collection_strategy="After scrolling",
+                        visit_id=self.visit_id,
+                        start_timestamp=load_timestamp,
+                        end_timestamp=datetime.utcnow(),
+                        num_cookies=len(cookies),
+                    ),
                 )
                 print("Will start browsing")
                 browse(
