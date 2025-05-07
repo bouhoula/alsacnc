@@ -22,6 +22,7 @@ from cookie_crawler.commands.get_command import (
 )
 from cookie_crawler.utils.cmp import detect_cmp
 from cookie_crawler.utils.css_selectors import parse_selectors_for_url
+from cookie_crawler.utils.gpc import detect_gpc
 from cookie_crawler.utils.js import (
     extract_text_from_element,
     get_link_to_text_ratio,
@@ -98,6 +99,11 @@ class GetCookieBannerCommand(BaseCommand):
                 self.website["language"],
             )
             return
+
+        if self.config["check_gpc_presence"]:
+            gpc_detected = detect_gpc(self.website["name"])
+            logger.info(f"GPC detected: {gpc_detected}")
+            self.website["gpc_detected"] = int(gpc_detected)
 
         detect_cmp(self.website, webdriver, **self.config["detect_cmp"])
         self.website["visit_id"] = self.visit_id

@@ -16,6 +16,7 @@ from cookie_crawler.commands.cookie_banner_command import GetCookieBannerCommand
 from cookie_crawler.utils.callbacks import get_callback
 from cookie_crawler.utils.css_selectors import get_selectors
 from cookie_crawler.utils.domains import get_domains
+from cookie_crawler.utils.gpc import enable_gpc
 from cookie_crawler.utils.monkey_patches import (
     apply_monkey_patch_to_task_manager,
     apply_monkey_patches,
@@ -125,6 +126,9 @@ def main(config_path: str, **kwargs: Any) -> None:
     browser_params = list()
     browser_params_dict = config.pop("browser_config")
     set_up_proxy(config["proxy"], browser_params_dict)
+
+    if config["check_gpc_presence"]:
+        enable_gpc(browser_params_dict)
 
     country, region = get_ip_location()
     if country is None:
