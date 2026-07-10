@@ -127,4 +127,4 @@ def run(self: BrowserManager) -> None:
 
 
 def monkey_patch_browser_manager() -> None:
-    BrowserManager.run = run
+    BrowserManager.run_impl = run

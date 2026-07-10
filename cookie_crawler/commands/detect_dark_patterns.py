@@ -42,7 +42,7 @@ def get_dominant_color(
     img = Image.open(img_path)
     img = img.resize((150, 150))
     arr = np.array(img)
-    arr = arr.reshape(np.product(arr.shape[:2]), arr.shape[2]).astype(float)
+    arr = arr.reshape(np.prod(arr.shape[:2]), arr.shape[2]).astype(float)
     codes, _ = scipy.cluster.vq.kmeans(arr, num_clusters)
     vecs, _ = scipy.cluster.vq.vq(arr, codes)
     counts, _ = np.histogram(vecs, len(codes))

@@ -12,11 +12,11 @@ import click
 import pandas as pd
 from sqlalchemy import create_engine, text, update
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, subqueryload
+from sqlalchemy.orm import noload, sessionmaker, subqueryload
 from sqlalchemy.pool import NullPool
 
 import database.tables as tables
-from shared_utils import read_txt_file, repeat
+from shared_utils import load_yaml, read_txt_file, repeat
 
 Session = sessionmaker(expire_on_commit=False)
 OpenWPMSession = sessionmaker()
@@ -35,11 +35,12 @@ def init_db(
 ) -> None:
     if engine_name == "postgres":
         db_url = f"postgresql+psycopg2://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+        engine = create_engine(db_url, poolclass=NullPool)
     elif engine_name == "sqlite":
         db_url = f"sqlite:///{os.getenv('DB_PATH')}"
+        engine = create_engine(db_url, connect_args=dict(check_same_thread=False))
     else:
         raise ValueError(f"Unrecognized engine name {engine_name}")
-    engine = create_engine(db_url, poolclass=NullPool)
     Session.configure(bind=engine)
     if drop_existing_tables:
         with Session() as session:
@@ -57,6 +58,7 @@ def create_entry(entry_dict: Dict) -> None:
     with Session() as session:
         entry = (
             session.query(entry_dict["__tablename__"])
+            .options(noload("*"))
             .filter_by(id=entry_dict["id"])
             .one()
         )
@@ -70,6 +72,7 @@ def update_entry(entry_dict: Dict) -> None:
     with Session() as session:
         entry = (
             session.query(entry_dict["__tablename__"])
+            .options(noload("*"))
             .filter_by(id=entry_dict["id"])
             .one()
         )
@@ -167,8 +170,9 @@ def get_table(
             query = query.filter(filter_expr)
 
     if return_df:
-        df = pd.read_sql(query.statement, query.session.bind)
-        return df
+        with query.session.bind.connect() as conn:
+            result = conn.execute(query.statement)
+            return pd.DataFrame(result.fetchall(), columns=list(result.keys()))
 
     entries = []
     for entry in query:
@@ -530,7 +534,8 @@ def main(
     experiment_id: Optional[str], command: str, attr: Optional[str], verbose: bool
 ) -> None:
     print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    init_db("postgres", create_tables=True)
+    config = load_yaml("config/experiment_config.yaml")
+    init_db(config["engine"], create_tables=True)
     if command == "ls":
         list_experiments()
     else:

@@ -1,5 +1,5 @@
 # General config
-engine: postgres
+engine: sqlite
 num_browsers: 30 # number of parallel browsers used for the crawl
 num_attempts_per_website: 1 # total number of crawl attempts per website
 timeout: 2700 # in seconds
@@ -7,7 +7,8 @@ experiment_id: null # used to identify the crawl in the database, null = generat
 screen_width: 2732
 screen_height: 1366
 dump_full_page_html: True
-save_cookie_banner_screenshot: True 
+save_cookie_banner_screenshot: True
+save_report_screenshots: True
 check_gpc_presence: False
 override: False
 extract_accept_none_cookies: True
@@ -29,6 +30,10 @@ detect_dark_patterns: True
 ietc_model_url: http://host.docker.internal:5001/predict_ietc
 num_links_for_browsing: 5
 
+report:
+    generate_report: True
+    exclude_first_party: False
+
 # CMP detection parameters
 detect_cmp:
     detect_cmp_enabled: True
@@ -39,11 +44,11 @@ domains_config:
     domains_path: null # specify custom domains path
     # crux-related parameters
     countries: [
-      "us", "gb", "fr", "de", "ie", "at", "nl", "pl", "es", "se", "ch"
+      "fr"
     ]
-    countries_desc: "eu_uk"
-    crux_date: "202303"
-    maximum_rank: 10000
+    countries_desc: "fr"
+    crux_date: "202606"
+    maximum_rank: 5000
     num_domains: 0
     num_samples_per_country_per_rank: 10000
     split_interval: 200
@@ -209,5 +214,5 @@ browser_config:
 
 
 # Development config
-debug: False 
+debug: False
 clear_db: False

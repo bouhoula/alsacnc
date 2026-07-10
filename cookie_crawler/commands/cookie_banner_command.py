@@ -25,9 +25,14 @@ from cookie_crawler.utils.css_selectors import parse_selectors_for_url
 from cookie_crawler.utils.gpc import detect_gpc
 from cookie_crawler.utils.js import (
     extract_text_from_element,
+    find_element_by_selector,
     get_link_to_text_ratio,
     get_selector_from_element,
     get_z_index,
+)
+from cookie_crawler.utils.report_screenshots import (
+    highlight_and_capture,
+    save_report_screenshot,
 )
 from cookie_crawler.utils.translate import detect_language
 from database.queries import insert_exception_into_db, insert_into_db, update_entry
@@ -46,6 +51,43 @@ class GetCookieBannerCommand(BaseCommand):
             f"GetCookieBannerCommand({self.website['url']}, "
             f"{self.website['crux_country']}, rank={self.website['crux_rank']})"
         )
+
+    def _capture_before_exploration_screenshot(
+        self,
+        webdriver: Firefox,
+        banner_selector: Optional[str],
+        iframe_id: Optional[str],
+    ) -> None:
+        switched = False
+        try:
+            if iframe_id is not None:
+                iframe_el = find_element_by_selector(iframe_id, webdriver)
+                if iframe_el is not None:
+                    webdriver.switch_to.frame(iframe_el)
+                    switched = True
+            banner_el = (
+                find_element_by_selector(banner_selector, webdriver)
+                if banner_selector is not None
+                else None
+            )
+            if banner_el is not None:
+                highlight_and_capture(
+                    webdriver,
+                    banner_el,
+                    self.website["save_path"],
+                    "No interaction",
+                    0,
+                    highlighted_text=None,
+                )
+            else:
+                save_report_screenshot(
+                    webdriver, self.website["save_path"], "No interaction", 0
+                )
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Could not capture avant_toute_action screenshot: {e}")
+        finally:
+            if switched:
+                webdriver.switch_to.parent_frame()
 
     # flake8: noqa: C901
     def execute(
@@ -263,6 +305,10 @@ class GetCookieBannerCommand(BaseCommand):
                         num_cookies=len(cookies),
                     ),
                 )
+                if self.config.get("save_report_screenshots"):
+                    self._capture_before_exploration_screenshot(
+                        webdriver, banner_selector, iframe_id
+                    )
                 load_timestamp, _ = load_page(
                     self.website["url"], webdriver, browser_params, delete_cookies=True
                 )

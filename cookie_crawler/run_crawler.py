@@ -13,6 +13,7 @@ from openwpm.task_manager import TaskManager
 import click
 
 from cookie_crawler.commands.cookie_banner_command import GetCookieBannerCommand
+from cookie_crawler.report.generate_report import generate_reports
 from cookie_crawler.utils.callbacks import get_callback
 from cookie_crawler.utils.css_selectors import get_selectors
 from cookie_crawler.utils.domains import get_domains
@@ -61,12 +62,6 @@ def main(config_path: str, **kwargs: Any) -> None:
 
     if config["debug"]:
         os.environ["DB_NAME"] = "cookie_db_debug"
-    init_db(
-        engine_name=config["engine"],
-        create_tables=True,
-        drop_existing_tables=config["clear_db"],
-    )
-    print("initialized database")
 
     experiment_id = config["experiment_id"]
     if experiment_id is None:
@@ -83,6 +78,18 @@ def main(config_path: str, **kwargs: Any) -> None:
                     countries_desc = "_".join(config["domains_config"]["country"])
                 experiment_id = f"crux_{countries_desc}_{origin}"
             experiment_id = f"{experiment_id}_{start_time_str}"
+
+    data_directory = Path(f"./experiments/{experiment_id}")
+    data_directory.mkdir(exist_ok=True, parents=True)
+    if config["engine"] == "sqlite":
+        os.environ["DB_PATH"] = str(data_directory / "cookie_banners.sqlite")
+
+    init_db(
+        engine_name=config["engine"],
+        create_tables=True,
+        drop_existing_tables=config["clear_db"],
+    )
+    print("initialized database")
 
     experiment = get_entry("experiments", filter=dict(id=(1, experiment_id)))
     if experiment is None:
@@ -114,13 +121,7 @@ def main(config_path: str, **kwargs: Any) -> None:
     log_dir.mkdir(exist_ok=True, parents=True)
     manager_params.log_path = log_dir / f"crawl_{start_time_str}.log"
     manager_params.log_path.touch(exist_ok=True)
-    manager_params.data_directory = Path(f"./experiments/{experiment_id}")
-    manager_params.data_directory.mkdir(exist_ok=True, parents=True)
-
-    if config["engine"] == "sqlite":
-        os.environ["DB_PATH"] = str(
-            manager_params.data_directory / "cookie_banners.sqlite"
-        )
+    manager_params.data_directory = data_directory
 
     selectors = get_selectors()
     browser_params = list()
@@ -252,6 +253,16 @@ def main(config_path: str, **kwargs: Any) -> None:
 
         experiment["num_full_iterations"] += 1
         update_entry(experiment)
+
+    if config["report"]["generate_report"]:
+        try:
+            generate_reports(
+                experiment_id,
+                out_dir=data_directory / "reports",
+                exclude_first_party=config["report"]["exclude_first_party"],
+            )
+        except Exception as e:
+            logger.warning(f"Report generation failed: {e}")
 
     print(
         "Total running time:", timedelta(seconds=time.time() - start_time.timestamp())

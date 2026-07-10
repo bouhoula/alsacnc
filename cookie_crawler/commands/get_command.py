@@ -2,7 +2,7 @@ import logging
 import random
 import time
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 from urllib import parse as urlparse
 
 from openwpm.commands.browser_commands import close_other_windows, tab_restart_browser
@@ -138,6 +138,7 @@ def reload_page_and_click_on_elements(
     browser_params: BrowserParams,
     delete_cookies: bool = False,
     sleep: int = 5,
+    before_click: Optional[Callable[[int, WebElement, Firefox], None]] = None,
 ) -> Tuple[Tuple[datetime, Optional[datetime]], bool]:
     if delete_cookies:
         clear_data(webdriver)
@@ -147,7 +148,7 @@ def reload_page_and_click_on_elements(
     time.sleep(1)
     get_command(url, sleep, webdriver, browser_params)
     body = webdriver.find_element("tag name", "body")
-    for element_id, iframe_id in zip(elements_ids, iframes_ids):
+    for step, (element_id, iframe_id) in enumerate(zip(elements_ids, iframes_ids)):
         if iframe_id is not None:
             iframe = find_element_by_selector(iframe_id, webdriver)
             webdriver.switch_to.frame(iframe)
@@ -158,6 +159,11 @@ def reload_page_and_click_on_elements(
                 "Could not find element to click. It is likely that the webpage was not loaded properly."
             )
         time.sleep(1)
+        if before_click is not None:
+            try:
+                before_click(step, element, webdriver)
+            except Exception as e:  # noqa: BLE001
+                logger.warning(f"before_click callback failed: {e}")
         click_timestamp = datetime.utcnow()
         click(element, webdriver)
         if iframe_id is not None:

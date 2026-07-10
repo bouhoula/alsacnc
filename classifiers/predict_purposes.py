@@ -23,6 +23,7 @@ from database.queries import (
     insert_into_db,
     update_entry,
 )
+from shared_utils import load_yaml
 
 
 def compute_expiry_time_in_seconds(
@@ -123,7 +124,8 @@ class Predictor:
 @general_options
 @prediction_options
 def main(config_file: str, **kwargs: Dict) -> None:
-    init_db("postgres", create_tables=True)
+    config = load_yaml("config/experiment_config.yaml")
+    init_db(config["engine"], create_tables=True)
     args = get_args(config_file, **kwargs)
     predictor = Predictor(args)
 

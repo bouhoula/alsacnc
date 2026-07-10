@@ -30,11 +30,16 @@ from cookie_crawler.utils.js import (
     click,
     element_is_hidden,
     extract_clickable_elements,
+    extract_text_from_element,
     find_element_by_selector,
     get_selector_from_element,
     get_visible_elements_ids,
     scroll_to_bottom,
     sort_elements,
+)
+from cookie_crawler.utils.report_screenshots import (
+    highlight_and_capture,
+    save_report_screenshot,
 )
 from database.queries import insert_into_db
 from shared_utils import get_timestamp, repeat
@@ -416,8 +421,9 @@ def explore_cookie_banner_with_ietc_model(
 
     if banner is None:
         raise ValueError(
-            "Cookie banner not found. Either the page did not reload properly, "
-            "or some selectors changed after reloading the page."
+            f"Cookie banner not found after reload (selector={banner_selector!r}). "
+            "Either the page did not reload properly, or data-clearing failed to "
+            "remove stored consent so the CMP suppressed the banner."
         )
     (
         root_elements_ids,
@@ -598,6 +604,7 @@ def explore_cookie_banner_with_ietc_model(
                             )
                         )
 
+    save_report_screenshots = experiment_config.get("save_report_screenshots", False)
     print(get_timestamp(website["name"]), "Collecting cookies for consent options.")
     for label_abbrv, label in LABELS.items():
         if label_abbrv == "settings":
@@ -609,6 +616,26 @@ def explore_cookie_banner_with_ietc_model(
         ):
             if idx == 0:
                 crawl_results[f"{label_abbrv}_button_detected"] = len(texts)
+
+                before_click = None
+                if save_report_screenshots:
+
+                    def before_click(
+                        step: int,
+                        element: WebElement,
+                        wd: Firefox,
+                        _label: str = label,
+                    ) -> None:
+                        highlight_and_capture(
+                            wd,
+                            element,
+                            website["save_path"],
+                            _label,
+                            step,
+                            highlighted_text=extract_text_from_element(element, wd)
+                            or None,
+                        )
+
                 load_timestamp, click_timestamp = reload_page_and_click_on_elements(
                     webdriver,
                     selectors,
@@ -616,7 +643,16 @@ def explore_cookie_banner_with_ietc_model(
                     website["url"],
                     browser_params,
                     delete_cookies=True,
+                    before_click=before_click,
                 )[0]
+                if save_report_screenshots:
+                    save_report_screenshot(
+                        webdriver,
+                        website["save_path"],
+                        label,
+                        len(selectors),
+                        highlighted_text=None,
+                    )
                 scroll_to_bottom(webdriver)
                 browse(
                     website["url"],

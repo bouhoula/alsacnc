@@ -23,8 +23,8 @@ services:
         depends_on:
             classifiers:
                 condition: service_started
-            postgres-cc:
-                condition: service_started
+            # postgres-cc:
+            #     condition: service_started
             libretranslate-cc:
                 condition: service_healthy
 
@@ -33,6 +33,8 @@ services:
             context: ../
             dockerfile: docker/classifiers/Dockerfile
         container_name: classifiers
+        volumes:
+            - ../experiments:/opt/repo/experiments
         env_file:
             - ../.env
         ports:
@@ -46,22 +48,22 @@ services:
 #                          count: 1
 #                          capabilities: [gpu]
 
-    postgres-cc:
-        image: postgres:12
-        container_name: postgres-cc
-        restart: unless-stopped
-        ports:
-            - 5432:5432
-        logging:
-            driver: "json-file"
-            options:
-                max-size: 50m
-        environment:
-            - POSTGRES_DB=crawl
-            - POSTGRES_USER=cookiestudy23
-            - POSTGRES_PASSWORD=cookiestudy2023
-        volumes:
-            - postgres-local:/var/lib/postgresql/data/
+    # postgres-cc:
+    #     image: postgres:12
+    #     container_name: postgres-cc
+    #     restart: unless-stopped
+    #     ports:
+    #         - 5432:5432
+    #     logging:
+    #         driver: "json-file"
+    #         options:
+    #             max-size: 50m
+    #     environment:
+    #         - POSTGRES_DB=crawl
+    #         - POSTGRES_USER=cookiestudy23
+    #         - POSTGRES_PASSWORD=cookiestudy2023
+    #     volumes:
+    #         - postgres-local:/var/lib/postgresql/data/
 
     libretranslate-cc:
         image: libretranslate/libretranslate:v1.5.6
@@ -92,6 +94,6 @@ volumes:
         name: lt-local
         external: false
 
-    postgres-local:
-        name: postgres-local
-        external: false
+    # postgres-local:
+    #     name: postgres-local
+    #     external: false

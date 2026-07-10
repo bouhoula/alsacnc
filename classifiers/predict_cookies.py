@@ -21,6 +21,7 @@ from database.queries import (
     update_entry,
     update_missing_entries_in_crawl_results,
 )
+from shared_utils import load_yaml
 
 NUM_POOL = min(cpu_count() - 1, 16)
 COOKIEBLOCK_MODEL_PATH: Optional[str] = None
@@ -148,11 +149,15 @@ def copy_cookies_iteration(ts: Dict, experiment_id: str) -> Dict:
     end_timestamp = ts["end_timestamp"].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     openwpm_engine = create_engine_for_openwpm_db(experiment_id)
-    cookies = pd.read_sql(
-        "SELECT * FROM javascript_cookies WHERE visit_id = ? AND ? <= time_stamp AND time_stamp <= ?",
-        openwpm_engine,
-        params=(str(ts["visit_id"]), start_timestamp, end_timestamp),
-    )
+    conn = openwpm_engine.raw_connection()
+    try:
+        cookies = pd.read_sql(
+            "SELECT * FROM javascript_cookies WHERE visit_id = ? AND ? <= time_stamp AND time_stamp <= ?",
+            conn,
+            params=(str(ts["visit_id"]), start_timestamp, end_timestamp),
+        )
+    finally:
+        conn.close()
     assert cookies["time_stamp"].apply(lambda x: x[-1] == "Z").all()
     cookies["timestamp"] = cookies["time_stamp"].apply(
         lambda x: datetime.fromisoformat(x[:-1])
@@ -234,7 +239,8 @@ def make_cookie_predictions(
 @general_options
 @prediction_options
 def main(config_file: str, **kwargs: Dict) -> None:
-    init_db("postgres", create_tables=True)
+    config = load_yaml("config/experiment_config.yaml")
+    init_db(config["engine"], create_tables=True)
     args = get_args(config_file, **kwargs)
     global COOKIEBLOCK_MODEL_PATH
     COOKIEBLOCK_MODEL_PATH = args.cookieblock_model

@@ -4,6 +4,7 @@ import click
 import pandas as pd
 
 from database.queries import get_last_experiment, get_table, init_db
+from shared_utils import load_yaml
 
 COOKIEBLOCK_THRESHOLD = 2
 
@@ -139,7 +140,8 @@ def filter_crawl_results_for_cmps(
 @click.command()
 @click.option("--experiment_id", default=None)
 def main(experiment_id: Optional[str]) -> None:
-    init_db("postgres", create_tables=True)
+    config = load_yaml("config/experiment_config.yaml")
+    init_db(config["engine"], create_tables=True)
 
     # Important: update experiment_id if it does not correspond to the last experiment
     # Use `python database/queries.py --command ls` to display all experiment

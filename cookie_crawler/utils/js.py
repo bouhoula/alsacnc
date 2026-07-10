@@ -26,6 +26,28 @@ def scroll_into_view(element: WebElement, webdriver: Firefox) -> None:
     )
 
 
+def highlight_element(
+    element: WebElement, webdriver: Firefox, color: str = "#ff0000"
+) -> None:
+    """Draw a visible box around `element` (in the current frame context)."""
+    try:
+        webdriver.execute_script(
+            open("cookie_crawler/scripts/highlight_element.js").read(), element, color
+        )
+    except (JavascriptException, StaleElementReferenceException, WebDriverException):
+        pass
+
+
+def remove_highlights(webdriver: Firefox) -> None:
+    """Remove all boxes added by `highlight_element` in the current frame context."""
+    try:
+        webdriver.execute_script(
+            open("cookie_crawler/scripts/remove_highlights.js").read()
+        )
+    except (JavascriptException, StaleElementReferenceException, WebDriverException):
+        pass
+
+
 @repeat()
 def click(element: WebElement, webdriver: Firefox, sleep: int = 3) -> None:
     webdriver.execute_script(
@@ -61,9 +83,13 @@ def get_selector_from_element(
 
 
 def clear_data(webdriver: Firefox) -> None:
-    webdriver.get("about:preferences#privacy")
-    webdriver.execute_script(open("cookie_crawler/scripts/clear_data.js").read())
-    time.sleep(2)
+    webdriver.delete_all_cookies()
+    try:
+        webdriver.execute_script(
+            "window.localStorage.clear(); window.sessionStorage.clear();"
+        )
+    except WebDriverException:
+        pass
 
 def element_is_hidden(element: WebElement, webdriver: Firefox) -> bool:
     return webdriver.execute_script(
