@@ -239,6 +239,7 @@ def make_cookie_predictions(
 @general_options
 @prediction_options
 def main(config_file: str, **kwargs: Dict) -> None:
+    print("Predicting cookies")
     config = load_yaml("config/experiment_config.yaml")
     init_db(config["engine"], create_tables=True)
     args = get_args(config_file, **kwargs)

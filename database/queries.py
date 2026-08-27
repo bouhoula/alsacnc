@@ -45,7 +45,10 @@ def init_db(
     if drop_existing_tables:
         with Session() as session:
             for table in reversed(tables.Base.metadata.sorted_tables):
-                session.execute(f"DROP TABLE {table.name} CASCADE")
+                try:
+                    session.execute(f"DROP TABLE {table.name} CASCADE")
+                except Exception:
+                    print("error deleting table: " + table.name)
             session.commit()
         print("Dropped existing tables.")
     if create_tables:

@@ -227,7 +227,7 @@ class GetCookieBannerCommand(BaseCommand):
                     )
                 )
                 #self.website["screenshot"] = webdriver.get_full_page_screenshot_as_png()
-                self.website["screenshot"] = webdriver.get_screenshot_as_png()
+                #self.website["screenshot"] = webdriver.get_screenshot_as_png()
                 update_entry(self.website)
                 webdriver.save_screenshot(
                     os.path.join(

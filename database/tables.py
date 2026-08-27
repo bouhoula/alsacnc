@@ -353,7 +353,7 @@ class Website(Base, CustomOperations):
     similarweb_data = Column(JSON)
     ranking_data = Column(JSON)
     cmp = Column(JSON)
-    screenshot = Column(LargeBinary)
+    #screenshot = Column(LargeBinary)
     other = Column(JSON)
 
     experiment_id = Column(String, ForeignKey("experiments.id"))

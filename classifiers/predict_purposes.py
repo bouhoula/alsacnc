@@ -6,6 +6,7 @@ import click
 import pandas as pd
 import torch
 from tqdm import tqdm
+from pathlib import Path
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 from classifiers.text_classifiers.get_args import (
@@ -15,6 +16,7 @@ from classifiers.text_classifiers.get_args import (
 )
 from classifiers.text_classifiers.get_datasets import get_dataloader_from_db
 from classifiers.text_classifiers.metrics import get_prediction
+from cookie_crawler.report.generate_report import generate_reports
 from database.queries import (
     get_entry,
     get_last_experiment,
@@ -24,6 +26,7 @@ from database.queries import (
     update_entry,
 )
 from shared_utils import load_yaml
+
 
 
 def compute_expiry_time_in_seconds(
@@ -136,6 +139,17 @@ def main(config_file: str, **kwargs: Dict) -> None:
     for experiment_id in experiment_ids:
         print("Starting prediction for", experiment_id)
         predictor.predict(experiment_id)
+
+        if config["report"]["generate_report"]:
+            try:
+                data_directory = Path(f"./experiments/{experiment_id}")
+                generate_reports(
+                    experiment_id,
+                    out_dir=data_directory / "reports",
+                    exclude_first_party=config["report"]["exclude_first_party"],
+                )
+            except Exception as e:
+                print(f"Report generation failed: {e}")
 
 
 if __name__ == "__main__":

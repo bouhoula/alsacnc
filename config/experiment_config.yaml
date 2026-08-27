@@ -1,5 +1,5 @@
 # General config
-engine: sqlite
+engine: postgres
 num_browsers: 30 # number of parallel browsers used for the crawl
 num_attempts_per_website: 1 # total number of crawl attempts per website
 timeout: 2700 # in seconds

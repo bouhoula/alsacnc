@@ -54,6 +54,7 @@ def _cookies_by_strategy(
         if candidate is not None and len(candidate) > 0:
             df = candidate
             break
+    print (str(df))
     result: Dict[str, List[Dict[str, str]]] = {}
     if df is None or len(df) == 0:
         return result
@@ -71,7 +72,7 @@ def _cookies_by_strategy(
         if key in seen.setdefault(strategy, set()):
             continue
         seen[strategy].add(key)
-        result.setdefault(strategy, []).append({"nom": name, "valeur": value or ""})
+        result.setdefault(strategy, []).append({"nom": name, "valeur": value or "", "domaine": domain})
     return result
 
 
